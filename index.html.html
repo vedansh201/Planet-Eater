@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tiny space snacker</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #000;
+    color: #fff;
+  }
+
+  #canvas-wrap {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+  }
+
+  canvas {
+    display: block;
+  }
+
+  #topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 9px 10px 11px 10px;
+    background: rgba(0, 0, 0, 0.55);
+    border-bottom: 3px solid #ffd23f;
+    z-index: 5;
+  }
+
+  button {
+    background: #ff6b9d;
+    border: 3px solid #000;
+    padding: 8px 15px 7px 14px;
+    font-size: 1em;
+    font-family: Arial, sans-serif;
+    cursor: pointer;
+    border-radius: 8px;
+    box-shadow: 3px 3px 0px #000;
+    color: #1b1350;
+  }
+
+  button:hover {
+    background: #ffd23f;
+    transform: translate(-1px, -1px);
+  }
+
+  button:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0px #000;
+  }
+
+  #status {
+    background: rgba(0,0,0,0.6);
+    border: 3px dashed #ffd23f;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    color: #ffd23f;
+  }
+
+  #msgbox {
+    position: fixed;
+    top: 58px;
+    left: 10px;
+    background: rgba(27, 19, 80, 0.85);
+    border: 3px solid #ffd23f;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 0.9em;
+    max-width: 210px;
+    display: none;
+    z-index: 5;
+    color: #fff;
+  }
+
+  .panel {
+    background: rgba(0, 0, 0, 0.6);
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 40px 30px;
+  }
+
+  /* the hero text is a lil off center on purpose, looked too perfect before */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 90px;
+    padding-left: 40px;
+  }
+
+  .hero h1 {
+    font-size: 4em;
+    margin: 0 0 6px -3px;
+    text-shadow: 3px 3px 0px #ff6b9d;
+    line-height: 1.05em;
+  }
+
+  .hero .sub {
+    font-size: 1.3em;
+    color: #cfd0ff;
+    margin: 14px 0 0 4px;
+    max-width: 480px;
+  }
+
+  .hero .scrolldown {
+    margin-top: 40px;
+    font-size: 0.9em;
+    color: #888;
+  }
+
+  .panel h2 {
+    color: #ff6b9d;
+    font-size: 2em;
+    margin-bottom: 6px;
+  }
+
+  .panel p {
+    line-height: 1.6em;
+    font-size: 1.05em;
+  }
+
+  .panel ul {
+    background: rgba(27, 19, 80, 0.7);
+    border: 3px solid #ffd23f;
+    padding: 14px 14px 14px 30px;
+    border-radius: 8px;
+  }
+
+  .panel li {
+    margin-bottom: 7px;
+  }
+
+  .note {
+    font-size: 0.85em;
+    color: #999;
+    font-style: italic;
+    margin-top: 24px;
+  }
+
+  footer {
+    text-align: center;
+    padding: 18px 20px 22px 20px;
+    background: rgba(0,0,0,0.7);
+    color: #ffd23f;
+    font-size: 0.85em;
+  }
+</style>
+</head>
+<body>
+
+<div id="canvas-wrap"></div>
+
+<div id="topbar">
+  <button id="feedBtn">launch random planet</button>
+  <button id="speedBtn">spin faster!!</button>
+  <div id="status">pl@nets eaten: <span id="count">0</span></div>
+</div>
+
+<div id="msgbox"></div>
+
+<section class="hero panel">
+  <h1>Hi im earth<br>(kinda)</h1>
+  <p class="sub">Theres a little earth floating around behind this page and it eats other planets for fun. I know that doesnt make sense. scroll down I guess</p>
+  <p class="scrolldown">^ This text is not centered on purpose, i moved it around for like 10 min and gave up.Pls don't judge</p>
+</section>
+
+<section class="panel">
+  <h2>0kay so whats actually happening</h2>
+  <p>
+    So basically theres this earth just floating there and 4 other planets orbiting
+    near it. mars, a saturn (has a ring, i was proud of that one), some purple striped
+    guy i just called "gas guy" cause i couldnt think of a name, and a little grey moon
+    rock that looks more like a party hat honestly.
+  </p>
+  <p>
+    Click on any of them and earth eats it. It flashes a random color, wobbles around
+    a bit, and its texture gets more scribbly the more it eats. 
+  </p>
+  <ul>
+    <li>Click a floating planet -&gt; earth eats it</li>
+    <li>Hover over one and it bounces a bit, small detail but i like it</li>
+    <li>Drag around with your mouse to look at stuff (orbit controls did the heavy lifting here)</li>
+    <li>Spin button = earth spins faster, click again for slow again</li>
+  </ul>
+</section>
+
+<section class="panel">
+  <h2>Random facts (some made up)</h2>
+  <p>1. Earth doesnt actually get bigger when it eats a planet, it just pretends really hard.</p>
+  <p>2. The moon rock isnt technically from our moon. dont l00k into it too much.</p>
+  <p>3. That glowy diagonal band you might notice in the background is just dots painted onto a canvas texture, its not a real photo of space or anything.</p>
+  <p>4. Saturns ring here is one (1) torus shape. the real saturn probably has more going on but i only had time for one.</p>
+  <p>5. I built this in a browser tab while another tab had music playing, if that matters to you for some reason.</p>
+</section>
+
+<footer>
+    P.S. made with three.js, some css, and n0t enough sleep. 
+    Could you find the easter eggs??
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+
+// basic scene setup stuff, nothing fancy
+var scene = new THREE.Scene()
+scene.background = new THREE.Color(0x000000);
+
+var wrap = document.getElementById('canvas-wrap');
+var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 3, 9)
+
+var renderer = new THREE.WebGLRenderer({antialias: true});
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+wrap.appendChild(renderer.domElement);
+
+var controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 1, 0);
+controls.enableZoom = false; // zoom was breaking the layout so i just turned it off lol
+controls.update();
+
+// lights, pretty basic setup
+var amb = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(amb);
+
+var dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+dirLight.position.set(5, 8, 5);
+dirLight.castShadow = true
+scene.add(dirLight);
+
+// background stars, just dots
+var starGeo = new THREE.BufferGeometry();
+var starCount = 400;
+var starPositions = [];
+for (var i = 0; i < starCount; i++) {
+  starPositions.push((Math.random() - 0.5) * 70);
+  starPositions.push((Math.random() - 0.5) * 50);
+  starPositions.push((Math.random() - 0.5) * 70);
+}
+starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
+var starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.12 });
+var stars = new THREE.Points(starGeo, starMat);
+scene.add(stars);
+
+// ---------- diagonal dust belt texture ----------
+// this was an accident at first but it looked cool so i kept it
+var beltCanvas = document.createElement('canvas');
+beltCanvas.width = 512;
+beltCanvas.height = 128;
+var bctx = beltCanvas.getContext('2d');
+bctx.fillStyle = "#1b1350";
+bctx.fillRect(0, 0, 512, 128);
+for (var i = 0; i < 500; i++) {
+  var bx = Math.random() * 512;
+  var by = Math.random() * 128;
+  var rad = Math.random() * 2 + 0.5;
+  var shade = Math.floor(Math.random() * 100) + 100;
+  bctx.fillStyle = 'rgba(' + shade + ',' + shade + ',255,0.7)';
+  bctx.beginPath();
+  bctx.arc(bx, by, rad, 0, Math.PI * 2);
+  bctx.fill();
+}
+var beltTexture = new THREE.CanvasTexture(beltCanvas);
+beltTexture.wrapS = THREE.RepeatWrapping;
+beltTexture.wrapT = THREE.RepeatWrapping;
+beltTexture.repeat.set(4, 1);
+
+var beltGeo = new THREE.PlaneGeometry(50, 8);
+var beltMat = new THREE.MeshBasicMaterial({map: beltTexture, transparent: true, opacity: 0.5, side: THREE.DoubleSide});
+var belt = new THREE.Mesh(beltGeo, beltMat);
+belt.rotation.z = Math.PI / 6;
+belt.position.set(0, -2, -15);
+scene.add(belt);
+
+// ---------- earth face texture, drawn on canvas ----------
+var earthCanvas = document.createElement('canvas');
+earthCanvas.width = 256;
+earthCanvas.height = 256;
+var ectx = earthCanvas.getContext('2d');
+
+function drawEarth(mood) {
+  ectx.fillStyle = '#3a7bd5';
+  ectx.fillRect(0, 0, 256, 256);
+
+  // continent blobs, more show up as mood goes up
+  ectx.fillStyle = '#4caf50';
+  var blobs = 5 + Math.min(mood, 10);
+  for (var i = 0; i < blobs; i++) {
+    var cx = Math.random() * 256;
+    var cy = Math.random() * 256;
+    ectx.beginPath();
+    ectx.moveTo(cx, cy);
+    for (var a = 0; a < 8; a++) {
+      var ang = (a / 8) * Math.PI * 2;
+      var r = 10 + Math.random() * 15;
+      ectx.lineTo(cx + Math.cos(ang) * r, cy + Math.sin(ang) * r);
+    }
+    ectx.closePath();
+    ectx.fill();
+  }
+
+  // cloud swirls, kinda janky arcs honestly
+  ectx.strokeStyle = 'rgba(255,255,255,0.6)';
+  ectx.lineWidth = 3;
+  for (var c = 0; c < 6; c++) {
+    ectx.beginPath();
+    ectx.arc(Math.random() * 256, Math.random() * 256, 8 + Math.random() * 10, 0, Math.PI * 1.4);
+    ectx.stroke();
+  }
+
+  // little label, tried to make it look handwritten-ish
+  ectx.fillStyle = '#fff';
+  ectx.font = '18px Comic Sans MS, sans-serif';
+  ectx.save();
+  ectx.translate(60, 230);
+  ectx.rotate(-0.05);
+  ectx.fillText('earth v1', 0, 0);
+  ectx.restore();
+}
+
+drawEarth(0);
+var earthTexture = new THREE.CanvasTexture(earthCanvas);
+
+// ---------- earth itself ----------
+var earthGroup = new THREE.Group();
+var earthGeo = new THREE.SphereGeometry(1.4, 24, 24);
+var earthMat = new THREE.MeshStandardMaterial({ color: 0xffffff, map: earthTexture });
+var earthMesh = new THREE.Mesh(earthGeo, earthMat);
+earthMesh.position.y = 1.6;
+earthMesh.castShadow = true;
+earthGroup.add(earthMesh)
+scene.add(earthGroup);
+
+// tiny moon just orbiting for decoration, not clickable
+var tinyMoonGeo = new THREE.SphereGeometry(0.3, 12, 12);
+var tinyMoonMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa });
+var tinyMoon = new THREE.Mesh(tinyMoonGeo, tinyMoonMat);
+scene.add(tinyMoon);
+
+// colors earth can flash when it eats something
+var earthColors = [0xffffff, 0xff9f43, 0xff6b9d, 0x4ecdc4, 0xffe66d, 0xb197fc];
+
+// ---------- the food planets ----------
+var planets = [];
+
+function makePlanet(geo, color, x, z, name, hasRing) {
+  var group = new THREE.Group();
+  var mat = new THREE.MeshStandardMaterial({ color: color });
+  var mesh = new THREE.Mesh(geo, mat);
+  mesh.castShadow = true;
+  group.add(mesh);
+
+  if (hasRing) {
+    var ringGeo = new THREE.TorusGeometry(0.9, 0.08, 8, 32);
+    var ringMat = new THREE.MeshStandardMaterial({ color: 0xd9c07f });
+    var ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = Math.PI / 2.2;
+    group.add(ring);
+  }
+
+  group.position.set(x, 2.2, z);
+  group.userData.name = name;
+  group.userData.baseY = 2.2;
+  group.userData.floatOffset = Math.random() * 10;
+  group.userData.clickMesh = mesh;
+  scene.add(group);
+  planets.push(group);
+}
+
+makePlanet(new THREE.SphereGeometry(0.5, 16, 16), 0xd85a30, 3.5, 1.5, 'mars');
+makePlanet(new THREE.SphereGeometry(0.55, 16, 16), 0xf0d18a, -3.5, 1.5, 'saturn', true);
+makePlanet(new THREE.BoxGeometry(0.9, 0.7, 0.9), 0x7f77dd, 3.5, -2, 'gas guy');
+makePlanet(new THREE.ConeGeometry(0.5, 0.9, 8), 0x999999, -3.5, -2, 'moon rock');
+
+// ---------- raycaster stuff for clicking ----------
+var raycaster = new THREE.Raycaster();
+var mouse = new THREE.Vector2();
+var hovered = null;
+
+function updateMouse(evt) {
+  mouse.x = (evt.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(evt.clientY / window.innerHeight) * 2 + 1;
+}
+
+function getClickTargets() {
+  var arr = [];
+  for (var i = 0; i < planets.length; i++) {
+    arr.push(planets[i].userData.clickMesh);
+  }
+  return arr;
+}
+
+function findGroupFromMesh(mesh) {
+  for (var i = 0; i < planets.length; i++) {
+    if (planets[i].userData.clickMesh === mesh) return planets[i];
+  }
+  return null;
+}
+
+window.addEventListener('mousemove', function(evt) {
+  updateMouse(evt);
+  raycaster.setFromCamera(mouse, camera);
+  var hits = raycaster.intersectObjects(getClickTargets());
+
+  if (hovered && (hits.length === 0 || hits[0].object !== hovered)) {
+    hovered.scale.set(1, 1, 1);
+    hovered = null;
+  }
+
+  if (hits.length > 0) {
+    hovered = hits[0].object;
+    hovered.scale.set(1.2, 1.2, 1.2);
+  }
+});
+
+var count = 0;
+var msgbox = document.getElementById('msgbox');
+var countSpan = document.getElementById('count');
+
+// ran out of good ideas around message 5 lol
+var messages = [
+  'nom nom!!',
+  'more planets please',
+  'that was crunchy',
+  'im getting bigger',
+  'hehe thanks',
+  'again again',
+  'space burp.',
+  'ok that one was weird tasting'
+];
+
+function feedEarth(planetName) {
+  count = count + 1;
+  countSpan.textContent = count;
+
+  var newColor = earthColors[Math.floor(Math.random() * earthColors.length)];
+  earthMesh.material.color.setHex(newColor);
+
+  earthMesh.userData.pulse = 1;
+
+  drawEarth(count);
+  earthTexture.needsUpdate = true;
+
+  var msg = messages[Math.floor(Math.random() * messages.length)];
+  msgbox.style.display = 'block';
+  msgbox.textContent = 'earth says: ' + msg + ' (ate ' + planetName + ')';
+  clearTimeout(window.msgTimer);
+  window.msgTimer = setTimeout(function() {
+    msgbox.style.display = 'none';
+  }, 1800);
+}
+
+// click checking thing
+window.addEventListener('click', function(evt) {
+  updateMouse(evt);
+  raycaster.setFromCamera(mouse, camera);
+  var hits = raycaster.intersectObjects(getClickTargets());
+  if (hits.length > 0) {
+    var group = findGroupFromMesh(hits[0].object);
+    if (group && !group.userData.eaten) {
+      feedEarth(group.userData.name);
+      group.userData.eaten = true;
+      group.userData.eatTime = 0;
+    }
+  }
+});
+
+document.getElementById('feedBtn').addEventListener('click', function() {
+  var notEaten = planets.filter(function(p) { return !p.userData.eaten });
+  if (notEaten.length === 0) {
+    return; // everyone got eaten already, nothing to launch
+  }
+  var p = notEaten[Math.floor(Math.random() * notEaten.length)];
+  feedEarth(p.userData.name);
+  p.userData.eaten = true;
+  p.userData.eatTime = 0;
+});
+
+var spinSpeed = 0.5;
+var fast = false;
+document.getElementById('speedBtn').addEventListener('click', function() {
+  fast = !fast;
+  spinSpeed = fast ? 2.5 : 0.5;
+});
+
+window.addEventListener('resize', function() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+var clock = new THREE.Clock();
+
+function animate() {
+  requestAnimationFrame(animate);
+  var delta = clock.getDelta();
+  var t = clock.getElapsedTime();
+
+  earthGroup.position.y = Math.sin(t * 1.2) * 0.15;
+  earthGroup.rotation.y += delta * spinSpeed;
+
+  tinyMoon.position.x = earthGroup.position.x + Math.cos(t * 1.5) * 2.4;
+  tinyMoon.position.z = Math.sin(t * 1.5) * 2.4;
+  tinyMoon.position.y = 1.6 + Math.sin(t * 2) * 0.2;
+
+  stars.rotation.y += delta * 0.02;
+  belt.rotation.z += delta * 0.01;
+
+  if (earthMesh.userData.pulse) {
+    earthMesh.userData.pulse -= delta * 2;
+    var s = 1 + Math.max(earthMesh.userData.pulse, 0) * 0.3;
+    earthMesh.scale.set(s, s, s);
+  }
+
+  for (var i = 0; i < planets.length; i++) {
+    var p = planets[i];
+    if (!p.userData.eaten) {
+      p.position.y = p.userData.baseY + Math.sin(t + p.userData.floatOffset) * 0.3;
+      p.rotation.y += delta * 0.6;
+    } else {
+      p.userData.eatTime += delta;
+      var e = p.userData.eatTime;
+      p.position.y += delta * 2;
+      p.position.x += (earthGroup.position.x - p.position.x) * delta * 1.5;
+      p.position.z += (earthGroup.position.z - p.position.z) * delta * 1.5;
+      p.scale.multiplyScalar(0.96);
+      if (e > 1.2) {
+        p.userData.eaten = false;
+        p.scale.set(1, 1, 1);
+        p.position.y = p.userData.baseY;
+      }
+    }
+  }
+
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+animate();
+
+</script>
+</body>
+</html>
