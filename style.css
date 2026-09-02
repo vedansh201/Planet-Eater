@@ -91,7 +91,6 @@ button:active {
   padding: 40px 30px;
 }
 
-/* the hero text is a lil off center on purpose, looked too perfect before */
 .hero {
   min-height: 100vh;
   display: flex;
